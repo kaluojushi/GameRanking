@@ -2,32 +2,92 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <meta charset="UTF-8">
+  <!-- import Vue before Element -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@next"></script>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus/dist/index.css">
+  <!-- import JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/element-plus"></script>
+  <title>达芬奇密码游戏排行榜</title>
 </head>
 
 <body>
-    <div id="app">
-        <el-button @click="visible = true">Button</el-button>
-        <el-dialog :visible.sync="visible" title="Hello world">
-            <p>Try Element</p>
-        </el-dialog>
-    </div>
+<div id="app">
+  <el-container>
+    <el-header>
+      <el-menu :default-active="activeIndex"
+               class="el-menu-demo"
+               mode="horizontal"
+               @select="handleSelect"
+               background-color="#545c64"
+               text-color="#fff"
+               active-text-color="#ffd04b">
+        <el-menu-item index="1"><span style="font-size: 18px">首页</span></el-menu-item>
+        <el-menu-item index="2"><span style="font-size: 18px">后台管理</span></el-menu-item>
+      </el-menu>
+    </el-header>
+    <el-main>
+      <el-table :data="tableData" style="width: 100%; font-size: 18px" :row-class-name="tableRowClassName">
+        <el-table-column prop="rank" label="排名" align="center"></el-table-column>
+        <el-table-column prop="name" label="姓名" align="center"></el-table-column>
+        <el-table-column prop="points" label="游戏积分" align="center"></el-table-column>
+      </el-table>
+    </el-main>
+  </el-container>
+</div>
 </body>
-<!-- import Vue before Element -->
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- import JavaScript -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
 <script>
-    new Vue({
-        el: '#app',
-        data() {
-            return {
-                visible: false
-            }
+  const App = {
+    el: '#app',
+    data() {
+      return {
+        visible: false,
+        activeIndex: '1',
+        tableData: [
+          {rank: 1, name: '马梓健', points: 5},
+          {rank: 2, name: '孙登江', points: 4},
+          {rank: 3, name: '于涛', points: 3},
+          {rank: 4, name: '康为民', points: 0},
+        ]
+      }
+    },
+    created() {
+
+    },
+    methods: {
+      handleSelect(key, keyPath) {
+        console.log(key);
+      },
+      tableRowClassName({ row, rowIndex }) {
+        switch (rowIndex) {
+          case 0: return 'success-row'; break;
+          case 1: return 'warning-row'; break;
+          case 2: return 'info-row'; break;
         }
-    })
+        return '';
+      }
+    }
+  };
+  const app = Vue.createApp(App);
+  app.use(ElementPlus);
+  app.mount("#app");
 </script>
+
+<style>
+  .el-table .success-row {
+    --el-table-tr-background-color: var(--el-color-success-lighter);
+  }
+
+  .el-table .warning-row {
+    --el-table-tr-background-color: var(--el-color-warning-lighter);
+  }
+
+  .el-table .info-row {
+    --el-table-tr-background-color: var(--el-color-info-lighter);
+  }
+
+</style>
 
 </html>
