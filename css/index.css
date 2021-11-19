@@ -1,0 +1,26 @@
+.el-table .success-row {
+  background: #f8d8b8;
+}
+
+.el-table .warning-row {
+  background: #e2e2e2;
+}
+
+.el-table .info-row {
+  background: #FDF5E6;
+}
+
+.title {
+  line-height: 24px;
+  margin: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  font-family: "黑体";
+  text-align: center;
+}
+
+.setting {
+  height: 20px;
+  margin: 5px;
+  text-align: right;
+}
