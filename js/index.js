@@ -26,11 +26,6 @@ new Vue({
     this.getPassword();
   },
   methods: {
-    // 处理导航栏选择
-    handleSelect(key, keyPath) {
-      console.log(key);
-    },
-
     // 处理冠亚季颜色
     tableRowClassName({row, rowIndex}) {
       switch (row.rank) {
@@ -99,7 +94,7 @@ new Vue({
     // 密码处理
     getPassword() {
       this.password = '';
-      let string = this.load("../data/password.txt");
+      let string = this.load("data/password.txt");
       this.password = string;
     },
     submitForm() {
