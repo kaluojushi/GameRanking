@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="//code.bdstatic.com/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+  <title>Title</title>
+</head>
+<body>
+
+</body>
+
+<script>
+  const {Query, User} = AV;
+  AV.init({
+    appId: "ELpotxI8WpWnIx5lziiXxgwD-gzGzoHsz",
+    appKey: "Q7hqXBufFru5ARAxT35BwVwA",
+    serverURL: "https://elpotxi8.lc-cn-n1-shared.com"
+  });
+  const query = new AV.Query('Todo');
+  query.find().then((items) => {
+    for (let item of items) {
+      console.log(item.attributes.priority)
+    }
+  })
+</script>
+
+</html>
