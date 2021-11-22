@@ -94,8 +94,11 @@ new Vue({
     // 密码处理
     getPassword() {
       this.password = '';
-      let string = this.load("data/password.txt");
-      this.password = string;
+      const pwdQuery = new AV.Query('System');
+      pwdQuery.equalTo('key', 'password');
+      pwdQuery.first().then((row) => {
+        this.password = row.get('value');
+      });
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
