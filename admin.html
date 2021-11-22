@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <!-- import Vue before Element -->
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- import JavaScript -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <!--  import LeanCloud-->
+  <script src="//code.bdstatic.com/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+  <title>达芬奇后台管理</title>
+</head>
+
+<body>
+<div id="app">
+  <el-container>
+    <el-header style="height: 100%; margin: 10px">
+      <el-page-header @back="goBack" content="达芬奇排行榜后台管理"></el-page-header>
+    </el-header>
+
+    <el-main>
+      <el-row>
+        <el-button type="primary" icon="el-icon-user" @click="userManage">人员管理</el-button>
+        <el-button type="success" icon="el-icon-magic-stick" @click="gameInput">游戏录入</el-button>
+        <el-button type="info" icon="el-icon-setting" @click="setting">系统管理</el-button>
+      </el-row>
+    </el-main>
+  </el-container>
+
+  <!--  人员管理-->
+  <el-dialog title="人员管理" :visible.sync="userManageOpen" width="80%">
+    <el-button type="success" icon="el-icon-add" @click="userAdd" plain>添加人员</el-button>
+    <el-table :data="tableData" style="width: 100%; font-size: 18px" :row-class-name="tableRowClassName">
+      <el-table-column prop="rank" label="排名" align="center">
+        <template slot-scope="scope">
+          <i class="el-icon-trophy" v-if="scope.row.rank === 1" style="font-weight: bold;"></i>
+          <i class="el-icon-medal" v-else-if="[2, 3].indexOf(scope.row.rank) > -1 "></i>
+          <span style="margin-left: 10px; font-weight: bold;">{{ scope.row.rank }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="姓名" align="center"></el-table-column>
+      <el-table-column prop="win" label="获胜次数" align="center"></el-table-column>
+      <el-table-column prop="mvp" label="MVP次数" align="center"></el-table-column>
+      <el-table-column prop="points" label="游戏积分" align="center">
+        <template slot-scope="scope">
+          <span style="font-weight: bold">{{ scope.row.points }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="games" label="游戏场数" align="center"></el-table-column>
+      <el-table-column label="操作" align="center" width="200">
+        <template slot-scope="scope">
+          <el-button type="text" size="medium" icon="el-icon-edit" @click="userEdit(scope.row)">编辑</el-button>
+          <el-button type="text" size="medium" icon="el-icon-delete" @click="userDelete(scope.row)">删除</el-button>
+          <el-button type="text" size="medium" icon="el-icon-refresh-left" @click="userReset(scope.row)">重置</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <span slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="finishUserManage">完 成</el-button>
+    </span>
+  </el-dialog>
+  <el-dialog title="添加人员" :visible.sync="userAddOpen" width="60%">
+    <el-form :model="userForm" :rules="userRules" ref="userAdd" label-width="75px" @submit.native.prevent>
+      <el-form-item label="姓名" prop="name">
+        <el-input placeholder="请输入姓名" v-model="userForm.name"></el-input>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="cancelUserAdd">取 消</el-button>
+      <el-button type="primary" @click="submitUserAdd">确 定</el-button>
+    </span>
+  </el-dialog>
+  <el-dialog title="修改人员" :visible.sync="userEditOpen" width="60%">
+    <el-form :model="userForm" :rules="userRules" ref="userEdit" label-width="100px">
+      <el-form-item label="姓名" prop="name">
+        <el-input placeholder="请输入姓名" v-model="userForm.name"></el-input>
+      </el-form-item>
+      <el-form-item label="获胜次数" prop="win">
+        <el-input-number v-model="userForm.win" :min="0"></el-input-number>
+      </el-form-item>
+      <el-form-item label="MVP次数" prop="mvp">
+        <el-input-number v-model="userForm.mvp" :min="0"></el-input-number>
+      </el-form-item>
+      <el-form-item label="游戏场数" prop="games">
+        <el-input-number v-model="userForm.games" :min="0"></el-input-number>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="cancelUserEdit">取 消</el-button>
+      <el-button type="primary" @click="submitUserEdit">确 定</el-button>
+    </span>
+  </el-dialog>
+
+  <!--  游戏录入-->
+  <el-dialog title="游戏录入" :visible.sync="gameInputOpen" width="60%">
+    <el-form :model="gameInputForm" :rules="gameInputRules" ref="gameInputForm" label-width="100px">
+      <el-form-item label="本场玩家" prop="player">
+        <el-checkbox-group v-model="gameInputForm.player">
+          <el-checkbox-button v-for="person in peopleNames" :key="person" :label="person">{{ person }}
+          </el-checkbox-button>
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item label="本场获胜者" prop="winner">
+        <el-checkbox-group v-model="gameInputForm.winner">
+          <el-checkbox-button v-for="person in peopleNames" :key="person" :label="person">{{ person }}
+          </el-checkbox-button>
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item label="本场MVP" prop="mvper">
+        <el-checkbox-group v-model="gameInputForm.mvper">
+          <el-checkbox-button v-for="person in peopleNames" :key="person" :label="person">{{ person }}
+          </el-checkbox-button>
+        </el-checkbox-group>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="cancelGameInput">取 消</el-button>
+      <el-button type="primary" @click="submitGameInput">确 定</el-button>
+    </span>
+  </el-dialog>
+
+  <!--  系统管理-->
+  <el-dialog title="系统管理" :visible.sync="settingOpen" width="60%">
+    <el-button type="danger" icon="el-icon-warning" @click="pwdChange" plain>修改密码</el-button>
+    <span slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="finishSetting">完 成</el-button>
+    </span>
+  </el-dialog>
+  <el-dialog title="修改密码" :visible.sync="pwdChangeOpen" width="50%">
+    <el-form :model="pwdChangeForm" :rules="pwdChangeRules" ref="pwdChangeForm" label-width="100px">
+      <el-form-item label="旧密码" prop="oldPwd">
+        <el-input placeholder="请输入旧密码" v-model="pwdChangeForm.oldPwd" show-password></el-input>
+      </el-form-item>
+      <el-form-item label="新密码" prop="newPwd">
+        <el-input placeholder="请输入新密码" v-model="pwdChangeForm.newPwd" show-password></el-input>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="cancelPwdChange">取 消</el-button>
+      <el-button type="primary" @click="submitPwdChange">确 定</el-button>
+    </span>
+  </el-dialog>
+</div>
+
+</body>
+
+<script src="js/admin.js"></script>
+
+<link rel="stylesheet" href="css/index.css">
+
+</html>
